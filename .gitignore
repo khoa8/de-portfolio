@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Airflow local
+airflow/logs/
+airflow/.env
+airflow/data/raw/
+airflow/data/processed/
+airflow/data/warehouse/
+airflow/pgdata/
+airflow/*.db
+airflow/.pytest_cache/
+
+# Docker
+*.log
+*.tmp

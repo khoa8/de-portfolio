@@ -87,6 +87,20 @@ x-airflow-common:
       condition: service_healthy
 
 services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sales
+      MYSQL_USER: airflow
+      MYSQL_PASSWORD: airflow
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    restart: always
+
   adminer:
     image: adminer
     restart: always
@@ -342,3 +356,4 @@ services:
 
 volumes:
   postgres-db-volume:
+  mysql-data:

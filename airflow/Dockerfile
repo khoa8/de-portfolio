@@ -13,9 +13,11 @@ RUN set -eux; \
 ENV JAVA_HOME=/usr/lib/jvm/java-17
 
 USER airflow
-# Cài PySpark + Spark provider cho Airflow (để dùng SparkSubmitOperator khi cần)
+# PySpark + Spark provider + psycopg2 (UPsert) + (tùy chọn) kafka-python (producer)
 RUN python -m pip install --no-cache-dir --upgrade pip && \
     python -m pip install --no-cache-dir \
       pyspark==3.5.1 \
-      apache-airflow-providers-apache-spark==5.2.1
+      apache-airflow-providers-apache-spark==5.2.1 \
+      psycopg2-binary==2.9.9 \
+      kafka-python==2.0.2
 

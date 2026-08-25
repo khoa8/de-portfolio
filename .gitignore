@@ -6,6 +6,8 @@ __pycache__/
 # Airflow local
 airflow/logs/
 airflow/.env
+airflow/config/airflow.cfg
+airflow/config/simple_auth_manager_passwords.json.generated
 airflow/data/raw/
 airflow/data/processed/
 airflow/data/warehouse/
@@ -16,3 +18,6 @@ airflow/.pytest_cache/
 # Docker
 *.log
 *.tmp
+
+# macOS
+.DS_Store

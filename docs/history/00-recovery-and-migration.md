@@ -38,13 +38,13 @@ The migration target is:
 macOS
   ├── Git / VS Code / Terminal
   └── Docker Desktop
-       ├── Airflow
+       ├── Airflow (LocalExecutor)
        ├── PostgreSQL
-       ├── Redis
-       ├── Spark
-       ├── MySQL
-       ├── Kafka
-       └── Debezium
+       └── Later phase-scoped services
+            ├── Spark
+            ├── MySQL
+            ├── Kafka
+            └── Debezium
 ```
 
 ## GitHub State at Recovery Time
@@ -251,8 +251,8 @@ Critical uncommitted code recovery  COMPLETE
 Migration to macOS                  STARTED
 Docker Desktop verification         COMPLETE
 Local PostgreSQL bootstrap          COMPLETE
-Airflow migration                   NEXT
-Spark / MSSQL migration             PENDING
+Airflow migration                   COMPLETE
+Spark / MSSQL migration             NEXT
 GCS / BigQuery migration            PENDING
 Kafka / Debezium migration          PENDING
 Fabric audit                        PENDING

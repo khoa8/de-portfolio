@@ -11,6 +11,7 @@
 
 - Phase 01 — macOS + Docker Desktop setup ✅
 - Phase 02 — PostgreSQL data layer ✅
+- Phase 03 — Airflow 3.0.4 + LocalExecutor ✅
 
 ## Verified environment
 
@@ -20,6 +21,10 @@
 - PostgreSQL host port: `5433`
 - Adminer host port: `8081`
 - Existing unrelated PostgreSQL container on host port `5432` is untouched
+- Airflow API server, scheduler, and DAG processor are healthy
+- Airflow executor: `LocalExecutor`
+- Airflow auth manager: `SimpleAuthManager`
+- Airflow UI/API host port: `8080`
 
 ## Verified databases
 
@@ -41,23 +46,25 @@ Verified table:
   - primary key: `raw_id`
   - unique constraint: `(source, order_code)`
 
+## Verified Airflow
+
+- Airflow metadata is stored in database `airflow`
+- `pg_dw` resolves to `postgres:5432/ecom_dw`
+- bundled examples are disabled
+- seven legacy DAGs remain tracked and quarantined
+- only `phase03_postgres_smoke` is active
+- DAG import errors: none
+- verified smoke run: `phase03_verify_20260825T195300Z` — `success`
+- canonical procedure: `docs/runbooks/03-airflow-setup.md`
+
 ## Active phase
 
-Phase 03 — Airflow
+Phase 04 — SQL Server → Spark → PostgreSQL staging
 
-Goal:
-
-- run Airflow on macOS Docker Desktop
-- use database `airflow` for Airflow metadata
-- create Airflow connection `pg_dw` to `ecom_dw`
-- verify DAG parsing/import
-- run a simple smoke-test DAG against `ecom_dw`
-
-Do not start Spark, MSSQL, BigQuery, Kafka, or Debezium in this phase.
+Phase 04 has not started.
 
 ## Next
 
-- Phase 04 — SQL Server → Spark → PostgreSQL staging
 - Phase 05 — STG → RAW → DW → DM
 - Phase 06 — PostgreSQL → GCS → BigQuery
 - Phase 07 — MySQL → Debezium → Kafka → Spark Streaming → PostgreSQL

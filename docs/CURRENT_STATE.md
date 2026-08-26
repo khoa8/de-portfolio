@@ -12,6 +12,7 @@
 - Phase 01 — macOS + Docker Desktop setup ✅
 - Phase 02 — PostgreSQL data layer ✅
 - Phase 03 — Airflow 3.0.4 + LocalExecutor ✅
+- Phase 04 — SQL Server → Spark → PostgreSQL staging ✅
 
 ## Verified environment
 
@@ -25,6 +26,8 @@
 - Airflow executor: `LocalExecutor`
 - Airflow auth manager: `SimpleAuthManager`
 - Airflow UI/API host port: `8080`
+- Spark `3.5.1` runs in local mode through Airflow `LocalExecutor`
+- SQL Server access uses a temporary loopback SSH tunnel; public port `1433` remains closed
 
 ## Verified databases
 
@@ -52,20 +55,30 @@ Verified table:
 - `pg_dw` resolves to `postgres:5432/ecom_dw`
 - bundled examples are disabled
 - seven legacy DAGs remain tracked and quarantined
-- only `phase03_postgres_smoke` is active
+- active repository DAGs: `phase03_postgres_smoke` and `mssql_ecom_to_stg`
 - DAG import errors: none
 - verified smoke run: `phase03_verify_20260825T195300Z` — `success`
+- post-Phase-04 regression run: `phase03_regression_20260826T165100Z` — `success`
 - canonical procedure: `docs/runbooks/03-airflow-setup.md`
 
-## Active phase
+## Verified Phase 04
 
-Phase 04 — SQL Server → Spark → PostgreSQL staging
+- source: `EDW_Tech.ecom` on the existing GCP SQL Server VM
+- targets: three canonical tables in `ecom_dw.stg_edw`
+- final verification runs:
+  - `phase04_verify_20260826T164900Z_run3` — `success`
+  - `phase04_verify_20260826T165000Z_run4` — `success`
+- stable counts on both runs:
+  - Lazada: `149139`
+  - Shopee: `244799`
+  - Tiki: `34423`
+- source/load/published counts reconciled for every platform
+- date and amount conversion failures: `0`
+- canonical runbook: `docs/runbooks/04-mssql-spark-to-postgres-staging.md`
 
-Phase 04 has not started.
+## Next phase
 
-## Next
-
-- Phase 05 — STG → RAW → DW → DM
+- Phase 05 — STG → RAW → DW → DM — not started
 - Phase 06 — PostgreSQL → GCS → BigQuery
 - Phase 07 — MySQL → Debezium → Kafka → Spark Streaming → PostgreSQL
 

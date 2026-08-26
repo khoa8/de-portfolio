@@ -21,6 +21,15 @@ x-airflow-common: &airflow-common
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
     AIRFLOW_CONN_PG_DW: >-
       {"conn_type":"postgres","host":"postgres","port":5432,"login":"${POSTGRES_USER}","password":"${POSTGRES_PASSWORD}","schema":"ecom_dw"}
+    AIRFLOW_CONN_SPARK_LOCAL: >-
+      {"conn_type":"spark","host":"local[*]"}
+    MSSQL_HOST: ${MSSQL_HOST:-}
+    MSSQL_PORT: ${MSSQL_PORT:-1433}
+    MSSQL_DATABASE: ${MSSQL_DATABASE:-EDW_Tech}
+    MSSQL_USER: ${MSSQL_USER:-}
+    MSSQL_PASSWORD: ${MSSQL_PASSWORD:-}
+    MSSQL_ENCRYPT: ${MSSQL_ENCRYPT:-true}
+    MSSQL_TRUST_SERVER_CERTIFICATE: ${MSSQL_TRUST_SERVER_CERTIFICATE:-false}
   volumes:
     - ./dags:/opt/airflow/dags:ro
     - ./logs:/opt/airflow/logs
@@ -28,6 +37,7 @@ x-airflow-common: &airflow-common
     - ./plugins:/opt/airflow/plugins:ro
     - ./data:/opt/airflow/data:ro
     - ../spark:/opt/airflow/spark:ro
+    - ../sql:/opt/airflow/sql:ro
     - airflow_auth:/opt/airflow/auth
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:

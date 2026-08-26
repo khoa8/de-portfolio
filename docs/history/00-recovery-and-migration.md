@@ -252,10 +252,19 @@ Migration to macOS                  STARTED
 Docker Desktop verification         COMPLETE
 Local PostgreSQL bootstrap          COMPLETE
 Airflow migration                   COMPLETE
-Spark / MSSQL migration             NEXT
-GCS / BigQuery migration            PENDING
+Spark / MSSQL migration             COMPLETE
+GCS / BigQuery migration            NEXT
 Kafka / Debezium migration          PENDING
 Fabric audit                        PENDING
 ```
+
+Phase 04 was reverified on macOS against the original live SQL Server source on
+the existing GCP VM. The clean implementation uses an instance-scoped temporary
+SSH tunnel, a dedicated object-level read-only SQL login, pinned checksum-verified
+JDBC drivers, disposable load tables, and an atomic PostgreSQL publish step. Two
+consecutive Airflow runs produced stable counts with zero conversion failures.
+Live evidence also revealed the source-specific date formats that were missing
+from the recovered Spark parser; those formats are now covered by regression
+tests. No legacy credential or binary JAR was recovered into Git.
 
 The UTM VM should remain archived until the important pipelines have been reproduced successfully on macOS.

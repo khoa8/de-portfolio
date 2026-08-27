@@ -15,6 +15,7 @@
 - Phase 04 — SQL Server → Spark → PostgreSQL staging ✅
 - Phase 05 — STG → RAW → DW → DM ✅
 - Phase 06 — PostgreSQL → GCS → BigQuery ✅
+- Phase 07 — MySQL CDC → Kafka → Spark Streaming → PostgreSQL ✅
 
 ## Verified environment
 
@@ -33,6 +34,11 @@
 - Phase 05 runs entirely against local PostgreSQL and does not require the GCP VM or tunnel
 - Phase 06 uses user ADC mounted as one read-only file in Airflow
 - Google provider: `apache-airflow-providers-google==17.0.0`
+- Phase 07 uses pinned native ARM64 MySQL 8.4.6, Kafka 3.9.1 KRaft,
+  Debezium Connect 3.2.4, and Kafka UI 0.7.2
+- the streaming stack is profile-scoped and the batch stack remains independent
+- Phase 07 host ports for MySQL, Connect REST, and Kafka UI bind only to
+  `127.0.0.1`
 
 ## Verified databases
 
@@ -61,7 +67,8 @@ Verified table:
 - bundled examples are disabled
 - seven legacy DAGs remain tracked and quarantined
 - active repository DAGs: `phase03_postgres_smoke`, `mssql_ecom_to_stg`,
-  `ecom_stg_to_raw_dw_dm`, and `postgres_to_gcs_bigquery`
+  `ecom_stg_to_raw_dw_dm`, `postgres_to_gcs_bigquery`, and
+  `mysql_cdc_to_postgres`
 - DAG import errors: none
 - verified smoke run: `phase03_verify_20260825T195300Z` — `success`
 - post-Phase-04 regression run: `phase03_regression_20260826T165100Z` — `success`
@@ -123,9 +130,35 @@ Verified table:
   `phase03_regression_after_phase06_20260827T045900Z` — `success`
 - canonical runbook: `docs/runbooks/06-postgres-gcs-bigquery.md`
 
+## Verified Phase 07
+
+- source: local MySQL `phase07_shop.orders`; no cloud source used
+- Debezium connector/task: `RUNNING / RUNNING`
+- three Connect internal topics: `cleanup.policy=compact`
+- PostgreSQL sinks: append-only `cdc.order_events` and offset-guarded,
+  soft-delete `cdc.orders_current`
+- deterministic topic/event result: `8` Kafka records → `8` distinct sink TPOs
+- Debezium decimal mode is `string`; the `DECIMAL(18,2)` probe
+  `9999999999999999.99` reconciled exactly through MySQL, Kafka, event JSON,
+  and PostgreSQL
+- the fixed `debezium` account has source-database `SELECT` plus only the
+  verified replication/snapshot global grants; it has no global `SELECT` or
+  database `ALL`
+- final current-state reconciliation: MySQL active rows `2`, PostgreSQL active
+  rows `2`, active total `10000000000000025.74`; one deleted order is retained
+  as soft-deleted
+- malformed event retained and excluded from current-state mutation
+- consecutive checkpoint-resume runs:
+  - `phase07_hardening_20260827T073000Z_run1` — `success`
+  - `phase07_hardening_20260827T073000Z_run2` — `success`
+- second run produced no duplicate event/current rows
+- post-Phase-07 regression run:
+  `phase07_hardening_regression_20260827T073000Z` — `success`
+- canonical runbook: `docs/runbooks/07-mysql-kafka-spark-streaming.md`
+
 ## Next phase
 
-- Phase 07 — MySQL → Debezium → Kafka → Spark Streaming → PostgreSQL
+- No later phase has been started; the next scope requires a separate brief.
 
 ## Rule
 

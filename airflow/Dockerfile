@@ -4,6 +4,7 @@ ARG MSSQL_JDBC_VERSION=13.4.0.jre11
 ARG MSSQL_JDBC_SHA256=e36f5237c1267983e5b88dc2169f6b9d7e50eceec6dc1ca31018e3877e14af66
 ARG POSTGRESQL_JDBC_VERSION=42.7.7
 ARG POSTGRESQL_JDBC_SHA256=157963d60ae66d607e09466e8c0cdf8087e9cb20d0159899ffca96bca2528460
+ARG SPARK_KAFKA_PACKAGE=org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1
 
 USER root
 # Cài Java 17 (multi-arch, chạy được trên M1)
@@ -38,3 +39,13 @@ RUN python -m pip install --no-cache-dir \
       apache-airflow-providers-apache-spark==5.2.1 \
       psycopg2-binary==2.9.9 \
       kafka-python==2.0.2
+
+# Resolve the pinned Spark Kafka connector during the image build. The Ivy
+# cache stays in the image so Phase 07 runtime does not depend on an unpinned
+# or ad-hoc package download.
+RUN python -c "from pathlib import Path; Path('/tmp/phase07_resolve.py').write_text('from pyspark.sql import SparkSession\nSparkSession.builder.master(\"local[1]\").appName(\"phase07-dependency-resolve\").getOrCreate().stop()\n', encoding='utf-8')" \
+    && spark-submit \
+         --conf spark.jars.ivy=/home/airflow/.ivy2 \
+         --packages "${SPARK_KAFKA_PACKAGE}" \
+         /tmp/phase07_resolve.py \
+    && rm /tmp/phase07_resolve.py

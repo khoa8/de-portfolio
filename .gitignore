@@ -14,6 +14,8 @@ airflow/data/warehouse/
 airflow/pgdata/
 airflow/*.db
 airflow/.pytest_cache/
+airflow/checkpoints/
+airflow/.ivy2/
 
 # Docker
 *.log

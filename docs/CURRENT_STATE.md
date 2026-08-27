@@ -16,6 +16,7 @@
 - Phase 05 — STG → RAW → DW → DM ✅
 - Phase 06 — PostgreSQL → GCS → BigQuery ✅
 - Phase 07 — MySQL CDC → Kafka → Spark Streaming → PostgreSQL ✅
+- Phase 08 — Portfolio release readiness ✅
 
 ## Verified environment
 
@@ -133,7 +134,8 @@ Verified table:
 ## Verified Phase 07
 
 - source: local MySQL `phase07_shop.orders`; no cloud source used
-- Debezium connector/task: `RUNNING / RUNNING`
+- during Phase 07 verification, Debezium connector/task was
+  `RUNNING / RUNNING`
 - three Connect internal topics: `cleanup.policy=compact`
 - PostgreSQL sinks: append-only `cdc.order_events` and offset-guarded,
   soft-delete `cdc.orders_current`
@@ -156,9 +158,33 @@ Verified table:
   `phase07_hardening_regression_20260827T073000Z` — `success`
 - canonical runbook: `docs/runbooks/07-mysql-kafka-spark-streaming.md`
 
+## Verified Phase 08
+
+- root `README.md` is the portfolio landing page with the problem statement,
+  batch/streaming architecture, stack, verified results, quick start, and
+  canonical documentation links
+- `docs/ARCHITECTURE.md`, `docs/VERIFICATION.md`, and `docs/DEMO.md` provide the
+  architecture overview, evidence index, and short safe demo path
+- legacy Kafka/setup guidance now points to the verified Compose layers,
+  services, DAGs, topic/checkpoint contracts, and phase runbooks
+- tracked legacy connector password was replaced with a non-secret placeholder
+- GitHub Actions CI is offline and secret-free: repository hygiene/link checks,
+  Python compile, 25 focused tests, base Compose validation, streaming profile
+  validation, and Git whitespace checks
+- a materialized fresh-checkout simulation passed the same validator, compile,
+  focused tests, and both Compose configurations without `.env`, generated
+  artifacts, credentials, containers, or cloud access
+- no screenshot was added; the release package uses reproducible command-backed
+  evidence and does not publish machine-specific authenticated UI state
+- after Phase 08 verification, the four long-running Phase 07 streaming
+  containers were intentionally stopped to release RAM; all three MySQL,
+  Kafka, and Spark-checkpoint named volumes remain preserved, while PostgreSQL,
+  Adminer, and Airflow remain running/healthy
+
 ## Next phase
 
-- No later phase has been started; the next scope requires a separate brief.
+- The portfolio is ready for final review. Merge, default-branch changes,
+  tagging, and release creation require separate explicit approval.
 
 ## Rule
 

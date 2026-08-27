@@ -1,0 +1,64 @@
+name: Portfolio CI
+
+on:
+  push:
+    branches:
+      - portfolio-recovery
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portfolio-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate repository hygiene and links
+        run: python3 scripts/ci/validate_repository.py
+
+      - name: Compile Python sources
+        env:
+          PYTHONPYCACHEPREFIX: /tmp/de_portfolio_ci_pycache
+        run: python3 -m compileall -q airflow/dags airflow/scripts spark tests scripts/ci
+
+      - name: Run focused offline tests
+        env:
+          PYTHONPYCACHEPREFIX: /tmp/de_portfolio_ci_pycache
+        run: |
+          python3 -m unittest \
+            tests.test_phase04_spark_job.Phase04ConfigurationTests \
+            tests.test_phase07_streaming \
+            tests.test_phase08_repository
+
+      - name: Validate base Compose topology
+        run: |
+          docker compose --env-file airflow/.env.example \
+            -f airflow/docker-compose.batch.yaml \
+            -f airflow/docker-compose.yaml \
+            config --quiet
+
+      - name: Validate streaming Compose topology
+        run: |
+          docker compose --env-file airflow/.env.example \
+            -f airflow/docker-compose.batch.yaml \
+            -f airflow/docker-compose.yaml \
+            -f airflow/docker-compose.streaming.yaml \
+            --profile phase07 config --quiet
+
+      - name: Verify clean checkout whitespace
+        run: git diff --check

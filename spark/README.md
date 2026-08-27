@@ -1,7 +1,9 @@
 # Spark notes for this repository
 
-The current verified Spark procedure is
-`docs/runbooks/04-mssql-spark-to-postgres-staging.md`.
+The verified Spark procedures are:
+
+- [Phase 04 SQL Server batch ingestion](../docs/runbooks/04-mssql-spark-to-postgres-staging.md);
+- [Phase 07 bounded/continuous CDC processing](../docs/runbooks/07-mysql-kafka-spark-streaming.md).
 
 ## Current architecture
 
@@ -11,6 +13,7 @@ The current verified Spark procedure is
 - Microsoft JDBC `13.4.0.jre11`
 - PostgreSQL JDBC `42.7.7`
 - business target: `postgres:5432/ecom_dw`, never the Airflow metadata database
+- Spark Structured Streaming `availableNow` for bounded Airflow execution
 
 The Docker image downloads pinned JDBC JARs during build and verifies their
 SHA-256 values. Binary JARs are not committed and DAG runs do not download
@@ -48,6 +51,12 @@ Use explicit source-key and target-table allowlists. Tiki's missing buyer field
 must be a typed Spark string null. Treat conversion failures as measured data
 quality evidence rather than silently dropping rows.
 
+For Phase 07, `spark/mysql_cdc_to_postgres.py` reads Debezium events from the
+one-partition Kafka topic, preserves string-encoded decimal precision, appends
+every topic-partition-offset to `cdc.order_events`, and applies newer-offset
+guarded upserts or soft deletes to `cdc.orders_current`. Its checkpoint uses a
+dedicated named volume outside Airflow logs.
+
 ## Useful checks
 
 ```bash
@@ -70,5 +79,5 @@ docker compose \
 ```
 
 Never print resolved Compose configuration when it contains `.env` values, run
-`docker compose down -v`, point business data at database `airflow`, or add
-Phase 05–07 logic to the Phase 04 job.
+destructive volume cleanup, point business data at database `airflow`, or mix
+later-phase logic into the Phase 04 batch job.

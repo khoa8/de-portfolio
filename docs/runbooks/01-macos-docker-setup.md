@@ -60,7 +60,7 @@ Example local values:
 
 ```dotenv
 POSTGRES_USER=airflow
-POSTGRES_PASSWORD=airflow
+POSTGRES_PASSWORD=change_me
 POSTGRES_DB=airflow
 POSTGRES_HOST_PORT=5433
 ```

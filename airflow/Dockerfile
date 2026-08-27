@@ -28,10 +28,12 @@ ENV JAVA_HOME=/usr/lib/jvm/java-17
 ENV PHASE04_JDBC_JARS=/opt/airflow/jars/mssql-jdbc-13.4.0.jre11.jar,/opt/airflow/jars/postgresql-42.7.7.jar
 
 USER airflow
-# Keep Airflow pinned while adding the PostgreSQL and Phase 04 Spark dependencies.
+# Keep Airflow pinned while adding the PostgreSQL, Spark, and Google Cloud
+# dependencies used by the verified batch phases.
 RUN python -m pip install --no-cache-dir \
       apache-airflow==3.0.4 \
       apache-airflow-providers-postgres==6.2.3 \
+      apache-airflow-providers-google==17.0.0 \
       pyspark==3.5.1 \
       apache-airflow-providers-apache-spark==5.2.1 \
       psycopg2-binary==2.9.9 \

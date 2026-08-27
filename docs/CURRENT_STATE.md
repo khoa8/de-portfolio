@@ -14,6 +14,7 @@
 - Phase 03 — Airflow 3.0.4 + LocalExecutor ✅
 - Phase 04 — SQL Server → Spark → PostgreSQL staging ✅
 - Phase 05 — STG → RAW → DW → DM ✅
+- Phase 06 — PostgreSQL → GCS → BigQuery ✅
 
 ## Verified environment
 
@@ -30,6 +31,8 @@
 - Spark `3.5.1` runs in local mode through Airflow `LocalExecutor`
 - SQL Server access uses a temporary loopback SSH tunnel; public port `1433` remains closed
 - Phase 05 runs entirely against local PostgreSQL and does not require the GCP VM or tunnel
+- Phase 06 uses user ADC mounted as one read-only file in Airflow
+- Google provider: `apache-airflow-providers-google==17.0.0`
 
 ## Verified databases
 
@@ -57,8 +60,8 @@ Verified table:
 - `pg_dw` resolves to `postgres:5432/ecom_dw`
 - bundled examples are disabled
 - seven legacy DAGs remain tracked and quarantined
-- active repository DAGs: `phase03_postgres_smoke`, `mssql_ecom_to_stg`, and
-  `ecom_stg_to_raw_dw_dm`
+- active repository DAGs: `phase03_postgres_smoke`, `mssql_ecom_to_stg`,
+  `ecom_stg_to_raw_dw_dm`, and `postgres_to_gcs_bigquery`
 - DAG import errors: none
 - verified smoke run: `phase03_verify_20260825T195300Z` — `success`
 - post-Phase-04 regression run: `phase03_regression_20260826T165100Z` — `success`
@@ -98,9 +101,30 @@ Verified table:
   `phase03_regression_after_phase05_20260826T194800Z` — `success`
 - canonical runbook: `docs/runbooks/05-stg-raw-dw-dm.md`
 
+## Verified Phase 06
+
+- source: local PostgreSQL `dw` and `dm`; the SQL Server VM was not used
+- GCS bucket: `edw_bucket_k` in `ASIA-SOUTHEAST1`
+- BigQuery project/datasets: `kinetic-genre-473714-d1`, `dw` and `dm` in
+  `asia-southeast1`
+- run-specific, wildcard-free NDJSON prefixes; exact objects validated before
+  canonical `WRITE_TRUNCATE`
+- pre-overwrite 30-day snapshots exist for the three canonical tables
+- final consecutive runs:
+  - `phase06_verify_20260827T045600Z_run1` — `success`
+  - `phase06_verify_20260827T045700Z_run2` — `success`
+- stable BigQuery results after both runs:
+  - dimension rows: `3`
+  - fact rows / unique orders: `245675 / 245675`
+  - daily groups / represented orders: `1336 / 245675`
+  - total sales: `50228062824`
+- PostgreSQL and BigQuery counts, per-platform counts, and totals reconciled
+- post-Phase-06 regression run:
+  `phase03_regression_after_phase06_20260827T045900Z` — `success`
+- canonical runbook: `docs/runbooks/06-postgres-gcs-bigquery.md`
+
 ## Next phase
 
-- Phase 06 — PostgreSQL → GCS → BigQuery — not started
 - Phase 07 — MySQL → Debezium → Kafka → Spark Streaming → PostgreSQL
 
 ## Rule

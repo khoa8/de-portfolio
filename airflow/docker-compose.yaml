@@ -23,6 +23,13 @@ x-airflow-common: &airflow-common
       {"conn_type":"postgres","host":"postgres","port":5432,"login":"${POSTGRES_USER}","password":"${POSTGRES_PASSWORD}","schema":"ecom_dw"}
     AIRFLOW_CONN_SPARK_LOCAL: >-
       {"conn_type":"spark","host":"local[*]"}
+    AIRFLOW_CONN_GOOGLE_CLOUD_DEFAULT: >-
+      {"conn_type":"google_cloud_platform","extra":{"project":"${GCP_PROJECT_ID:-kinetic-genre-473714-d1}"}}
+    GOOGLE_APPLICATION_CREDENTIALS: /opt/airflow/gcp/application_default_credentials.json
+    GOOGLE_CLOUD_PROJECT: ${GCP_PROJECT_ID:-kinetic-genre-473714-d1}
+    GCP_PROJECT_ID: ${GCP_PROJECT_ID:-kinetic-genre-473714-d1}
+    GCS_BUCKET: ${GCS_BUCKET:-edw_bucket_k}
+    BQ_LOCATION: ${BQ_LOCATION:-asia-southeast1}
     MSSQL_HOST: ${MSSQL_HOST:-}
     MSSQL_PORT: ${MSSQL_PORT:-1433}
     MSSQL_DATABASE: ${MSSQL_DATABASE:-EDW_Tech}
@@ -38,6 +45,7 @@ x-airflow-common: &airflow-common
     - ./data:/opt/airflow/data:ro
     - ../spark:/opt/airflow/spark:ro
     - ../sql:/opt/airflow/sql:ro
+    - ${GOOGLE_APPLICATION_CREDENTIALS_HOST_PATH:?Set GOOGLE_APPLICATION_CREDENTIALS_HOST_PATH to the local ADC file}:/opt/airflow/gcp/application_default_credentials.json:ro
     - airflow_auth:/opt/airflow/auth
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
